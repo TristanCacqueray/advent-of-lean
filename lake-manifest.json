@@ -1,0 +1,12 @@
+{"version": 6,
+ "packagesDir": "lake-packages",
+ "packages":
+ [{"git":
+   {"url": "https://github.com/leanprover/std4",
+    "subDir?": null,
+    "rev": "a93d4aab761b7962a6aab845b24837e192eaabc5",
+    "opts": {},
+    "name": "std",
+    "inputRev?": "a93d4aab761b7962a6aab845b24837e192eaabc5",
+    "inherited": false}}],
+ "name": "«advent-of-lean»"}
