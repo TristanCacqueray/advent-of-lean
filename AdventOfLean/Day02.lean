@@ -84,3 +84,25 @@ def doSolveA := do
   solveA file.toList
 
 #eval doSolveA
+
+
+def cubeMin (c1 : CubesCount) (c2 : CubesCount) := CubesCount.mk
+  (max c1.red c2.red) (max c1.green c2.green) (max c1.blue c2.blue)
+
+def cubePower (c : CubesCount) := max 1 c.red * max 1 c.green * max 1 c.blue
+
+def gamePower (game : Game) :=
+  match game.cubes with
+    | x :: xs => cubePower $ xs.foldr cubeMin x
+    | _ => 42
+
+def solveB (input : List String) := do
+  match sequence (input.map (Lean.Parsec.run game)) with
+    | .ok xs => IO.println (Nat.sum $ xs.map gamePower)
+    | .error err => IO.println err
+
+def doSolveB := do
+  let file <- IO.FS.lines "./data/day02.txt"
+  solveB file.toList
+
+#eval doSolveB
