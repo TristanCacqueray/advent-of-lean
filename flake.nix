@@ -9,11 +9,11 @@
       pkgs = import nixpkgs { system = "x86_64-linux"; };
       lean = pkgs.stdenv.mkDerivation rec {
         pname = "lean";
-        version = "4.2.0";
+        version = "4.3.0";
         src = pkgs.fetchurl {
           url =
             "https://github.com/leanprover/lean4/releases/download/v${version}/lean-${version}-linux.tar.zst";
-          sha256 = "sha256-aoDiOFVQXOSJuxq7Kj6Bx2HNDY3VQejlXJOo8Z/Y+hk=";
+          sha256 = "sha256-m59NJ+GiuRz7IWvKzeUAG4/eAb+QqQcmSypNSLOWdhI=";
         };
         buildInputs = [ pkgs.zstd ];
         unpackPhase = ''
@@ -24,5 +24,5 @@
         dontStrip = true;
         dontInstall = true;
       };
-    in { devShell."x86_64-linux" = pkgs.mkShell { buildInputs = [ lean ]; }; };
+    in { devShell."x86_64-linux" = pkgs.mkShell { buildInputs = [ lean pkgs.elan ]; }; };
 }
