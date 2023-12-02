@@ -1,4 +1,6 @@
-import Lean.Data.Parsec
+import Mathlib.Control.Traversable.Basic
+
+namespace Day2
 open Lean.Parsec
 
 def exampleA := [
@@ -72,6 +74,13 @@ def isCubesCountValid (cubes : CubesCount) : Bool :=
 def isGameValid (game : Game) : Bool :=
   game.cubes.all isCubesCountValid
 
-open Mathlib.Control.Traversable.Basic
-#eval sequence $ exampleA.map (Lean.Parsec.run game)
--- #eval List.filter isGameValid exampleA
+def solveA (input : List String) : IO Unit := do
+  match List.filter isGameValid <$> sequence (input.map (Lean.Parsec.run game)) with
+    | .ok xs => IO.println (Nat.sum $ xs.map Game.id)
+    | .error err => IO.println err
+
+def doSolveA := do
+  let file <- IO.FS.lines "./data/day02.txt"
+  solveA file.toList
+
+#eval doSolveA
