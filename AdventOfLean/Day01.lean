@@ -1,3 +1,5 @@
+import Mathlib.Data.Nat.Basic
+
 def exampleA := [
   "1abc2",
   "pqr3stu8vwx",
@@ -10,9 +12,6 @@ def Char.digitValue (c : Char) := c.toNat - 48
 def getDigitNumber (s : String) : Nat :=
   let numbers := s.toList.filter Char.isDigit
   numbers.head!.digitValue  * 10 + numbers.reverse.head!.digitValue
-
--- question: how to import that from https://leanprover-community.github.io/mathlib4_docs/Std/Data/Nat/Basic.html#Nat.sum
-def Nat.sum (l) := List.foldr (fun (x x_1 : Nat) => x + x_1) 0 l
 
 #eval Nat.sum ( exampleA.map getDigitNumber )
 
