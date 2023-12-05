@@ -78,7 +78,7 @@ partial def Almanac.parse (input : List String) : Almanac :=
          parseMaps newAcc (lines.drop (2 + ranges.length))
   Almanac.mk seeds (parseMaps [] (input.drop 2))
 
-#eval Almanac.parse exampleA
+-- #eval Almanac.parse exampleA
 
 def Range.apply (range : Range) (val : Nat) : Option Nat :=
   if val >= range.source && val < (range.source + range.size) then
@@ -107,4 +107,70 @@ def Almanac.solveA (almanac : Almanac) : Nat :=
 def doSolveA : IO Unit :=
   IO.FS.lines "./data/day05.txt" >>= fun file => IO.println (Almanac.parse file.toList).solveA
 
-#eval doSolveA
+-- #eval doSolveA
+
+abbrev SeedRange : Type := Nat × Nat
+
+-- | Check how seed range overlap with a map range. Return the list of unaffected seeds × maybe relocated seeds
+def Range.applyB (range : Range) (seeds : SeedRange) : (List SeedRange × Option SeedRange) :=
+  if seeds.fst >= range.source + range.size || seeds.snd < range.source then
+    -- seeds are outside
+    ([seeds], none)
+  else if seeds.fst >= range.source && seeds.snd < range.source + range.size then
+    -- seeds are inside
+    ([], some (range.dest + (seeds.fst - range.source), range.dest + (seeds.snd - range.source)))
+  else if seeds.fst <= range.source && seeds.snd >= range.source && seeds.snd < range.source + range.size then
+    -- lower overlap
+    ([(seeds.fst, range.source - 1)], some (range.dest, range.dest + (seeds.snd - range.source)))
+  else if seeds.fst < range.source + range.size then
+    -- upper overlap
+    ([(range.source + range.size, seeds.snd)], some (range.dest + (seeds.fst - range.source), range.dest + range.size - 1))
+  else
+    -- full overlap
+    ([(seeds.fst, range.source - 1), (range.source + range.size, seeds.snd)], some (range.dest, range.dest + range.size - 1))
+
+-- | Apply a map to a given seed range
+def Map.applyB (map : Map) (seeds : SeedRange) : List SeedRange :=
+  -- return the list of (unaffected, relocated) seeds for a given range
+  let rec gos (range : Range) (acc : (List SeedRange × List SeedRange)) : (todo : List SeedRange) -> (List SeedRange × List SeedRange)
+   | [] => acc
+   | seeds :: rest => match range.applyB seeds with
+      | (seeds, none) => gos range (seeds ++ acc.fst, acc.snd) rest
+      | (seeds, some done) => gos range (seeds ++ acc.fst, done :: acc.snd) rest
+
+  -- return the list of seeds modified by the given map
+  let rec go (acc : List SeedRange) (todo : List SeedRange): List Range -> List SeedRange
+   | [] => acc.reverse ++ todo
+   | range :: rest =>
+       let (newTodo, done) := gos range ([], []) todo
+       -- dbg_trace "Applied range {range.source}-{range.source + range.size} for {todo} to {range.dest}-{range.dest + range.size}, newTodo {newTodo} done {done}"
+       go (done ++ acc) newTodo rest
+  -- dbg_trace "Applying map {map.source} to {seeds}"
+  let res := go [] [seeds] map.ranges
+  -- dbg_trace "=> {res}\n"
+  res
+
+def Almanac.solveB (almanac : Almanac) : Nat :=
+  let rec getRanges (acc : List SeedRange) : List Nat -> List SeedRange
+    | a :: b :: rest => getRanges ((a, a + b) :: acc) rest
+    | _ => acc.reverse
+  let seeds := getRanges [] almanac.seeds
+  -- dbg_trace "got {seeds}\n"
+
+  -- apply every maps
+  let rec go (seeds : List SeedRange) : List Map -> List SeedRange
+    | [] => seeds
+    | map :: rest => go (List.join (seeds.map (map.applyB .))) rest
+  let finals := go seeds almanac.maps
+  -- dbg_trace "{finals}"
+
+  -- return the lowest seed
+  (finals.map (fun final => final.fst)).minimum?.getD 0
+
+#eval (Almanac.parse exampleA).solveB
+
+def doSolveB : IO Unit :=
+  IO.FS.lines "./data/day05.txt" >>= fun file => IO.println (Almanac.parse file.toList).solveB
+
+-- #eval doSolveB
+-- too high 122674836
