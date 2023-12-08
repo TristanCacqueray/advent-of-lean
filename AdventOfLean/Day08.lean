@@ -1,4 +1,5 @@
 import Std.Data.RBMap.Basic
+import Std.Data.Nat.Gcd
 
 def exampleA := [
 "RL",
@@ -54,11 +55,45 @@ partial def solveA (map : Map) : Nat :=
           | none => 0
   go ("AAA", 1) map.dirs
 
-#eval solveA (Map.parse exampleA)
-#eval solveA (Map.parse exampleB)
+-- #eval solveA (Map.parse exampleA)
+-- #eval solveA (Map.parse exampleB)
 
 def doSolveA : IO Unit := do
   let file <- IO.FS.lines "./data/day08.txt"
   IO.println (solveA $ Map.parse file.toList)
 
-#eval doSolveA
+-- #eval doSolveA
+
+partial def solveB (map : Map) : Nat :=
+  let rec go (acc : (Node × Nat)) : List Char -> Nat
+    | [] => go acc map.dirs
+    | c :: rest =>
+        match map.nodes.find? acc.fst with
+          | some next =>
+            let newNode := if c == 'R' then next.snd else next.fst
+            if newNode.back == 'Z' then acc.snd else go (newNode, acc.snd + 1) rest
+          | _ => 0
+
+  let starts := map.nodes.keysList.filter (fun n => n.back == 'A')
+  starts.foldl (fun acc start => acc.lcm (go (start, 1) map.dirs)) 1
+
+def exampleC := [
+"LR",
+"",
+"11A = (11B, XXX)",
+"11B = (XXX, 11Z)",
+"11Z = (11B, XXX)",
+"22A = (22B, XXX)",
+"22B = (22C, 22C)",
+"22C = (22Z, 22Z)",
+"22Z = (22B, 22B)",
+"XXX = (XXX, XXX)"
+]
+
+#eval solveB (Map.parse exampleC)
+
+def doSolveB : IO Unit := do
+  let file <- IO.FS.lines "./data/day08.txt"
+  IO.println (solveB $ Map.parse file.toList)
+
+#eval doSolveB
