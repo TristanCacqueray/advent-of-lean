@@ -159,3 +159,30 @@ end NewNamespace
 -- add to namespace:
 def NewNamespace.quint := (. * 5)
 #check NewNamespace.quint
+
+-- Propositions and proof
+def OnePlusOneIsTwo : Prop := 1 + 1 = 2
+
+theorem onePlusOneIsTwo : OnePlusOneIsTwo := rfl
+
+theorem onePlusTwoIsThree : 1 + 2 = 3 := by
+  simp
+
+def fifth (xs : List α) (ok : xs.length > 4) : α := xs[4]
+#eval fifth ["a", "b", "c", "d", "e"] (by simp)
+
+
+-- Coercions
+structure NonEmptyList (α : Type) : Type where
+  head : α
+  tail : List α
+
+instance : Coe (NonEmptyList α) (List α) where
+  coe
+    | { head := x, tail := xs } => x :: xs
+
+instance : CoeDep (List α) (x :: xs) (NonEmptyList α) where
+  coe := { head := x, tail := xs }
+
+-- wow :)
+def nonEmptyCoercion : NonEmptyList String := ["a string"]
