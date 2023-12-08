@@ -209,3 +209,17 @@ instance : Coe Nat (NonEmptyList Bool) where
 
 def myNat : NonEmptyList Bool := ↑"test"
 #eval myNat
+
+-- indexing
+def hosts := ["k1s", "zuul"]
+
+#check hosts
+
+def host1 := hosts[0]
+
+#eval "first host is " ++ host1
+
+def getHost (pos : Nat) (hosts : List String) (ok : hosts.length > pos): String :=
+  hosts[pos]
+
+#eval getHost 2 ("other" :: hosts) (by simp (config := {decide := true}))
