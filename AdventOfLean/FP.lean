@@ -169,7 +169,7 @@ theorem onePlusTwoIsThree : 1 + 2 = 3 := by
   simp
 
 def fifth (xs : List α) (ok : xs.length > 4) : α := xs[4]
-#eval fifth ["a", "b", "c", "d", "e"] (by simp)
+#eval fifth ["a", "b", "c", "d", "e"] (by simp (config := {decide := true}))
 
 
 -- Coercions
