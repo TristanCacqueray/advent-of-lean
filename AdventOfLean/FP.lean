@@ -1,7 +1,7 @@
 -- My notes from https://leanprover.github.io/functional_programming_in_lean
 namespace FP
 
-#eval "Hello, world!"
+#eval s!"Hello, world {1 + 2}!"
 
 def add1 (n : Nat) : Nat := n + 1
 
@@ -176,6 +176,7 @@ def fifth (xs : List α) (ok : xs.length > 4) : α := xs[4]
 structure NonEmptyList (α : Type) : Type where
   head : α
   tail : List α
+ deriving Repr
 
 instance : Coe (NonEmptyList α) (List α) where
   coe
@@ -184,5 +185,27 @@ instance : Coe (NonEmptyList α) (List α) where
 instance : CoeDep (List α) (x :: xs) (NonEmptyList α) where
   coe := { head := x, tail := xs }
 
+def testFun : NonEmptyList String -> Nat
+  | _ => 0
+
 -- wow :)
-def nonEmptyCoercion : NonEmptyList String := ["a string"]
+def nonEmptyCoercion : Nat := testFun ["a string"]
+
+#eval nonEmptyCoercion
+
+def someCoercion : Option (Option (Option Nat)) := (42 : Nat)
+
+def testCoerce (n : String) : Option String := n
+
+#eval testCoerce "toto"
+
+instance : Coe String Nat where
+  coe
+   | x => x.toNat!
+
+instance : Coe Nat (NonEmptyList Bool) where
+  coe
+   | _ => { head := true, tail := []}
+
+def myNat : NonEmptyList Bool := ↑"test"
+#eval myNat
